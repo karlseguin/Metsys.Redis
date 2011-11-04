@@ -13,5 +13,10 @@ namespace Metsys.Redis
       {
          return _encoder.GetBytes(value);
       }
+
+      public static string GetString(byte[] data)
+      {
+         return _encoder.GetString(data);
+      }
    }
 }

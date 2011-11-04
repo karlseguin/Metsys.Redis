@@ -13,6 +13,11 @@ namespace Metsys.Redis
       private Pool<Redis> _redisPool;
       private readonly Configuration _configuration = new Configuration();
 
+      public Configuration Configuration
+      {
+         get { return _configuration; }
+      }
+
       public static IRedisManager Configure(Action<IConfiguration> action)
       {
          var manager = new RedisManager();
@@ -27,15 +32,18 @@ namespace Metsys.Redis
          return _redisPool.CheckOut();
       }
 
-      public IConnection GetConnection()
+      public bool GetConnection(out IConnection connection)
       {
-         return _connectionPool.CheckOut();
+         return _connectionPool.CheckOut(out connection);
       }
 
-      public void CheckIn(Redis redis)
+      public void CheckIn(Redis redis, bool error)
       {
          var connection = redis.Connection;
-         if (connection != null) {_connectionPool.CheckIn(connection);}
+         if (connection != null)
+         {
+            _connectionPool.CheckIn(connection, error);
+         }
          _redisPool.CheckIn(redis);
       }
    }

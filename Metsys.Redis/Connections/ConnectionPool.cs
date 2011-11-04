@@ -21,30 +21,30 @@ namespace Metsys.Redis
          _timer = new Timer(o => Cleanup(), null, 30000, 30000);
       }
 
-      public IConnection CheckOut()
+      public bool CheckOut(out IConnection connection)
       {
-         IConnection connection;
          if (_freeConnections.TryDequeue(out connection))
          {
             Interlocked.Increment(ref _connectionsInUse);
-            return connection;
+            return false;
          }
 
          if (_connectionsInUse < _maximumPoolSize)
          {
             Interlocked.Increment(ref _connectionsInUse);
-            return new Connection(_connectionInfo);
+            connection = new Connection(_connectionInfo);
+            return true;
          }
          if (!_notifier.WaitOne(10000))
          {
             throw new RedisException("Connection timeout trying to get connection from connection pool");
          }
-         return CheckOut();
+         return CheckOut(out connection);
       }
 
-      public void CheckIn(IConnection connection)
+      public void CheckIn(IConnection connection, bool error)
       {
-         if (!IsAlive(connection))
+         if (error || !IsAlive(connection))
          {
             _invalidConnections.Enqueue(connection);
             Interlocked.Decrement(ref _connectionsInUse);

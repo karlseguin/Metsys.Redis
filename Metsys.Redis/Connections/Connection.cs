@@ -65,11 +65,15 @@ namespace Metsys.Redis
       public void Dispose()
       {
          Dispose(true);
+         GC.SuppressFinalize(this);
       }
       protected virtual void Dispose(bool disposing)
       {
          if (_disposed) { return; }
-         _client.Close();
+         if (disposing)
+         {
+            _client.Close();
+         }
          _disposed = true;
       }
 

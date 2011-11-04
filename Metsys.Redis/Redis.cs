@@ -6,12 +6,27 @@ namespace Metsys.Redis
    public class Redis : IRedis
    {
       private readonly RedisManager _manager;
+      private readonly Configuration _configuration;
+      private IConnection _connection;
+      private bool _selectedADatabase;
+      private bool _error;
 
-      public IConnection Connection { get; private set; }
+      public IConnection Connection
+      {
+         get { return _connection; }
+      }
 
       internal Redis(RedisManager manager)
       {
          _manager = manager;
+         _configuration = manager.Configuration;
+      }
+
+      private static readonly byte[] _getCommand = Encoding.GetBytes("GET");
+      public T Get<T>(string key)
+      {
+         var data = Send(Writer.Serialize(_getCommand, key), Reader.Bulk);
+         return data == null ? default(T) : Serializer.Deserialize<T>(data);
       }
 
       private static readonly byte[] _incrCommand = Encoding.GetBytes("INCR");
@@ -27,28 +42,78 @@ namespace Metsys.Redis
       }
 
       private static readonly byte[] _delCommand = Encoding.GetBytes("DEL");
-      public long Del(string key)
+      public long Del(params string[] key)
       {
          return Send(Writer.Serialize(_delCommand, key), Reader.Integer);
       }
 
-      public T Send<T>(WriteContext context, Func<Stream, T> callback)
+      private static readonly byte[] _flushDbCommand = Encoding.GetBytes("FLUSHDB");
+      public void FlushDb()
       {
-         if (Connection == null)
+         Send(Writer.Serialize(_flushDbCommand), Reader.Status);
+      }
+
+      
+      public void Select(int database)
+      {
+         Select(database, true);
+      }
+
+      private static readonly byte[] _selectCommand = Encoding.GetBytes("SELECT");
+      private void Select(int database, bool flagAsDifferent)
+      {
+         if (flagAsDifferent) { _selectedADatabase = true; }
+         Send(Writer.Serialize(_selectCommand, database.ToString()), Reader.Status);
+      }
+
+      private T Send<T>(WriteContext context, Func<Stream, T> callback)
+      {
+         if (_connection == null)
          {
-            Connection = _manager.GetConnection();
+            _error = false;
+            if (_manager.GetConnection(out _connection) && _configuration.Database != 0)
+            {
+               Select(_configuration.Database, false);
+            }
          }
          using (context)
          {
-            Connection.Send(context.Buffer, context.Length);
-            return callback(Connection.GetStream());
+            try
+            {
+               Connection.Send(context.Buffer, context.Length);
+               return callback(Connection.GetStream());
+            }
+            catch
+            {
+               _error = true;
+               throw;
+            }
          }
       }
 
       public void Dispose()
       {
-         _manager.CheckIn(this);
-         Connection = null;
+         Dispose(true);
+         GC.SuppressFinalize(this);
       }
+      protected virtual void Dispose(bool disposing)
+      {
+         if (disposing)
+         {
+            if (!_error && _selectedADatabase)
+            {
+               Select(_configuration.Database, false);
+            }
+            _manager.CheckIn(this, _error);
+            _error = false;
+            _connection = null;
+         }
+      }
+
+      ~Redis()
+      {
+         Dispose(false);
+      }
+
    }
 }
