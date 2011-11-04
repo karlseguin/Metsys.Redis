@@ -30,7 +30,7 @@ namespace Metsys.Redis
       private RedisManager()
       {
          _redisPool = new ConcurrentQueue<IRedis>();
-         for(var i = 0; i < 25; ++i)
+         for(var i = 0; i < 4; ++i)
          {
             _redisPool.Enqueue(new Redis(this));
          }

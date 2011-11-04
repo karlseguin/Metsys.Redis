@@ -22,8 +22,8 @@ namespace Metsys.Redis
          dynamicBuffer.SetLength(length);
          var buffer = dynamicBuffer.Buffer;
          var offset = 0;
-         offset = WriteString(buffer, offset, parameterValues, _argumentCountMarker);
-         offset = WriteString(buffer, offset, commandValue, _argumentBytesMarker);
+         offset = WriteFastString(buffer, offset, parameterValues, _argumentCountMarker);
+         offset = WriteFastString(buffer, offset, commandValue, _argumentBytesMarker);
          offset = WriteBytes(buffer, offset, command, command.Length);
 
          foreach(var parameter in parameters)
@@ -45,12 +45,28 @@ namespace Metsys.Redis
          return WriteLineTerminator(buffer, offset);
       }
 
+      private static int WriteFastString(byte[] buffer, int offset, string value, byte marker)
+      {
+         buffer[offset] = marker;
+         return WriteFastString(buffer, offset + 1, value);
+      }
+
+      private static int WriteFastString(byte[] buffer, int offset, string value)
+      {
+         var length = value.Length;
+         for (var i = 0; i < length; ++i)
+         {
+            buffer[offset++] = (byte) value[i];
+         }
+         return WriteLineTerminator(buffer, offset);
+      }
+
       private static int WriteValue(byte[] buffer, int offset, object value)
       {
          if (value is string)
          {
             var v = (string)value;
-            offset = WriteString(buffer, offset, v.Length.ToString(), _argumentBytesMarker);
+            offset = WriteFastString(buffer, offset, v.Length.ToString(), _argumentBytesMarker);
             return WriteString(buffer, offset, v);
          }
          else
@@ -70,8 +86,8 @@ namespace Metsys.Redis
 
       private static int WriteLineTerminator(byte[] buffer, int offset)
       {
-         buffer[offset] = (byte) '\r';
-         buffer[offset+1] = (byte) '\n';
+         buffer[offset] = 0x0D;
+         buffer[offset + 1] = 0x0A;
          return offset + 2;
       }
 

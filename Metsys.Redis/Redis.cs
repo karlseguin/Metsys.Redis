@@ -18,48 +18,42 @@ namespace Metsys.Redis
          _dynamicBuffer = new DynamicBuffer();
       }
 
-      private static readonly byte[] _getCommand = Encoding.GetBytes("GET");
+      
       public T Get<T>(string key)
       {
-         var length = Send(Writer.Serialize(_getCommand, _dynamicBuffer, key), Reader.Bulk);
+         var length = Send(Writer.Serialize(Commands.Get, _dynamicBuffer, key), Reader.Bulk);
          return length == 0 ? default(T) : Serializer.Deserialize<T>(_dynamicBuffer);
       }
 
-      private static readonly byte[] _incrCommand = Encoding.GetBytes("INCR");
       public long Incr(string key)
       {
-         return Send(Writer.Serialize(_incrCommand, _dynamicBuffer, key), Reader.Integer);
+         return Send(Writer.Serialize(Commands.Incr, _dynamicBuffer, key), Reader.Integer);
       }
 
-      private static readonly byte[] _incrByCommand = Encoding.GetBytes("INCRBY");
       public long IncrBy(string key, int value)
       {
-         return Send(Writer.Serialize(_incrByCommand, _dynamicBuffer, key, value.ToString()), Reader.Integer);
+         return Send(Writer.Serialize(Commands.IncrBy, _dynamicBuffer, key, value.ToString()), Reader.Integer);
       }
 
-      private static readonly byte[] _delCommand = Encoding.GetBytes("DEL");
       public long Del(params string[] key)
       {
-         return Send(Writer.Serialize(_delCommand, _dynamicBuffer, key), Reader.Integer);
+         return Send(Writer.Serialize(Commands.Del, _dynamicBuffer, key), Reader.Integer);
       }
 
-      private static readonly byte[] _flushDbCommand = Encoding.GetBytes("FLUSHDB");
       public void FlushDb()
       {
-         Send(Writer.Serialize(_flushDbCommand, _dynamicBuffer), Reader.Status);
+         Send(Writer.Serialize(Commands.FlushDb, _dynamicBuffer), Reader.Status);
       }
 
-      
       public void Select(int database)
       {
          Select(database, true);
       }
 
-      private static readonly byte[] _selectCommand = Encoding.GetBytes("SELECT");
       private void Select(int database, bool flagAsDifferent)
       {
          if (flagAsDifferent) { _selectedADatabase = true; }
-         Send(Writer.Serialize(_selectCommand, _dynamicBuffer, database.ToString()), Reader.Status);
+         Send(Writer.Serialize(Commands.Select, _dynamicBuffer, database.ToString()), Reader.Status);
       }
 
       private T Send<T>(DynamicBuffer context, Func<Stream, DynamicBuffer, T> callback)

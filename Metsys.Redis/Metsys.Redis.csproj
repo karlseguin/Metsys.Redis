@@ -37,6 +37,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\ConnectionInfo.cs" />
