@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Metsys.Redis
 {
@@ -9,9 +11,9 @@ namespace Metsys.Redis
 
    public class RedisManager : IRedisManager
    {
-      private ConnectionPool _connectionPool;
-      private Pool<Redis> _redisPool;
+      private readonly ConcurrentQueue<IRedis> _redisPool;
       private readonly Configuration _configuration = new Configuration();
+      private readonly AutoResetEvent _notifier = new AutoResetEvent(false);
 
       public Configuration Configuration
       {
@@ -22,29 +24,41 @@ namespace Metsys.Redis
       {
          var manager = new RedisManager();
          action(manager._configuration);
-         manager._connectionPool = new ConnectionPool(manager._configuration.Server);
-         manager._redisPool = new Pool<Redis>(25, p => new Redis(manager));
          return manager;
+      }
+
+      private RedisManager()
+      {
+         _redisPool = new ConcurrentQueue<IRedis>();
+         for(var i = 0; i < 25; ++i)
+         {
+            _redisPool.Enqueue(new Redis(this));
+         }
       }
 
       public IRedis Redis()
       {
-         return _redisPool.CheckOut();
-      }
-
-      public bool GetConnection(out IConnection connection)
-      {
-         return _connectionPool.CheckOut(out connection);
-      }
-
-      public void CheckIn(Redis redis, bool error)
-      {
-         var connection = redis.Connection;
-         if (connection != null)
+         IRedis redis;
+         if (_redisPool.TryDequeue(out redis))
          {
-            _connectionPool.CheckIn(connection, error);
+            return redis;
          }
-         _redisPool.CheckIn(redis);
+         if (!_notifier.WaitOne(10000))
+         {
+            throw new RedisException("Timed out waiting for a connection from the pool");
+         }
+         return Redis();
+      }
+
+      public Connection GetConnection()
+      {
+         return new Connection(_configuration.Server);
+      }
+
+      public void CheckIn(Redis redis)
+      {
+         _redisPool.Enqueue(redis);
+         _notifier.Set();
       }
    }
 }

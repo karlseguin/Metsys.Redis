@@ -10,12 +10,6 @@ namespace Metsys.Redis
       private DynamicBuffer _dynamicBuffer;
       private IConnection _connection;
       private bool _selectedADatabase;
-      private bool _error;
-
-      public IConnection Connection
-      {
-         get { return _connection; }
-      }
 
       internal Redis(RedisManager manager)
       {
@@ -70,10 +64,29 @@ namespace Metsys.Redis
 
       private T Send<T>(DynamicBuffer context, Func<Stream, DynamicBuffer, T> callback)
       {
+         EnsureConnection();
+         try
+         {
+            _connection.Send(context.Buffer, context.Length);
+            return callback(_connection.GetStream(), _dynamicBuffer);
+         }
+         catch
+         {
+            KillConnection();
+            throw;
+         }
+      }
+
+      private void EnsureConnection()
+      {
+         if (_connection != null && !_connection.IsAlive())
+         {
+            KillConnection();
+         }
          if (_connection == null)
          {
-            _error = false;
-            if (_manager.GetConnection(out _connection) && _configuration.Database != 0)
+            _connection = _manager.GetConnection();
+            if (_configuration.Database != 0)
             {
                var realBuffer = _dynamicBuffer;
                _dynamicBuffer = new DynamicBuffer();
@@ -81,16 +94,12 @@ namespace Metsys.Redis
                _dynamicBuffer = realBuffer;
             }
          }
-         try
-         {
-            Connection.Send(context.Buffer, context.Length);
-            return callback(Connection.GetStream(), _dynamicBuffer);
-         }
-         catch
-         {
-            _error = true;
-            throw;
-         }
+      }
+
+      private void KillConnection()
+      {
+         _connection.Dispose();
+         _connection = null;
       }
 
       public void Dispose()
@@ -102,13 +111,11 @@ namespace Metsys.Redis
       {
          if (disposing)
          {
-            if (!_error && _selectedADatabase)
+            if (_connection != null && _selectedADatabase)
             {
                Select(_configuration.Database, false);
             }
-            _manager.CheckIn(this, _error);
-            _error = false;
-            _connection = null;
+            _manager.CheckIn(this);
          }
       }
 

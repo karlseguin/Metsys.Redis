@@ -8,7 +8,6 @@ namespace Metsys.Redis
    {
       void Send(byte[] data, int length);
       Stream GetStream();
-      DateTime Created { get; }
       bool IsAlive();
    }
 
@@ -19,11 +18,6 @@ namespace Metsys.Redis
       private readonly TcpClient _client;
       private readonly NetworkStream _stream;
       private bool _isValid;
-
-      public DateTime Created
-      {
-         get { return _created; }
-      }
 
       public Connection(ConnectionInfo connectionInfo)
       {
@@ -59,7 +53,7 @@ namespace Metsys.Redis
 
       public bool IsAlive()
       {
-         return _client.Connected && _isValid;
+         return DateTime.Now.Subtract(_created).TotalMinutes < 10 && _client.Connected && _isValid;
       }
 
       public void Dispose()

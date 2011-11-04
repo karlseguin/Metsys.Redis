@@ -40,8 +40,6 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\ConnectionInfo.cs" />
-    <Compile Include="Connections\ConnectionPool.cs" />
-    <Compile Include="Pool.cs" />
     <Compile Include="IRedis.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Protocol\Encoding.cs" />
