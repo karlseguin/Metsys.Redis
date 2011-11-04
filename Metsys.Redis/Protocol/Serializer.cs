@@ -5,21 +5,21 @@ namespace Metsys.Redis
 {
    public class Serializer
    {
-      private static readonly IDictionary<Type, Func<byte[], object>> _deserializationTypeLookup = new Dictionary<Type, Func<byte[], object>>
+      private static readonly IDictionary<Type, Func<DynamicBuffer, object>> _deserializationTypeLookup = new Dictionary<Type, Func<DynamicBuffer, object>>
         {
-           {typeof (bool), d => d[0] == 1},
+           {typeof (bool), d => d.Buffer[0] == 1},
            {typeof (int), d => int.Parse(Encoding.GetString(d))},
            {typeof (long), d => long.Parse(Encoding.GetString(d))},
 
         };
 
-      public static T Deserialize<T>(byte[] data)
+      public static T Deserialize<T>(DynamicBuffer dynamicBuffer)
       {
-         Func<byte[], object> reader;
+         Func<DynamicBuffer, object> reader;
          var type = typeof (T);
          if (_deserializationTypeLookup.TryGetValue(type, out reader))
          {
-            return (T) reader(data);
+            return (T)reader(dynamicBuffer);
          }
          return default(T);
       }

@@ -14,13 +14,13 @@ namespace Metsys.Redis
       private const byte _CRReply = (byte)'\r';
       private const byte _LFReply = (byte)'\n';
 
-      public static long Integer(Stream stream)
+      public static long Integer(Stream stream, DynamicBuffer context)
       {
          AssertReplyKind(_integerMarker, stream);
          return ReadNumber(stream);
       }
 
-      public static bool Status(Stream stream)
+      public static bool Status(Stream stream, DynamicBuffer context)
       {
          AssertReplyKind(_lineMarker, stream);
          AssertNextByteIs(stream, _OReply);
@@ -29,22 +29,23 @@ namespace Metsys.Redis
          return true;
       }
 
-      public static byte[] Bulk(Stream stream)
+      public static int Bulk(Stream stream, DynamicBuffer context)
       {
          AssertReplyKind(_bulkMarker, stream);
          var length = (int)ReadNumber(stream);
          if (length == -1)
          {
-            return null;
+            return 0;
          }
-         var buffer = new byte[length];
+         context.SetLength(length);
+         var buffer = context.Buffer;
          var read = 0;
          while (read < length)
          {
             read += stream.Read(buffer, read, length);
          }
          ReadCrLf(stream);
-         return buffer;
+         return length;
       }
 
       private static void AssertNextByteIs(Stream stream, byte expected)

@@ -4,11 +4,10 @@ namespace Metsys.Redis
 {
    public class Writer
    {
-      private static readonly Pool<WriteContext> _contextPool = new Pool<WriteContext>(500, p => new WriteContext(p));
       private const byte _argumentCountMarker = (byte)'*';
       private const byte _argumentBytesMarker = (byte)'$';
       
-      public static WriteContext Serialize(byte[] command, params object[] parameters)
+      public static DynamicBuffer Serialize(byte[] command, DynamicBuffer dynamicBuffer, params object[] parameters)
       {
          var parameterValues = (parameters.Length + 1).ToString();
          var commandValue = command.Length.ToString();
@@ -20,9 +19,8 @@ namespace Metsys.Redis
             length += GetLength(parameter);
          }
 
-         var context = _contextPool.CheckOut();
-         context.SetLength(length);
-         var buffer = context.Buffer;
+         dynamicBuffer.SetLength(length);
+         var buffer = dynamicBuffer.Buffer;
          var offset = 0;
          offset = WriteString(buffer, offset, parameterValues, _argumentCountMarker);
          offset = WriteString(buffer, offset, commandValue, _argumentBytesMarker);
@@ -32,7 +30,7 @@ namespace Metsys.Redis
          {
             offset = WriteValue(buffer, offset, parameter);
          }
-         return context;
+         return dynamicBuffer;
       }
 
       private static int WriteString(byte[] buffer, int offset, string value, byte marker)

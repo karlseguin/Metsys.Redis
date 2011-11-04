@@ -47,7 +47,7 @@
     <Compile Include="Protocol\Encoding.cs" />
     <Compile Include="Protocol\Reader.cs" />
     <Compile Include="Protocol\Serializer.cs" />
-    <Compile Include="Protocol\WriteContext.cs" />
+    <Compile Include="Protocol\DynamicBuffer.cs" />
     <Compile Include="Protocol\Writer.cs" />
     <Compile Include="Redis.cs" />
     <Compile Include="RedisException.cs" />

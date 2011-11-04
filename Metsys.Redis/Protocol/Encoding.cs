@@ -14,9 +14,9 @@ namespace Metsys.Redis
          return _encoder.GetBytes(value);
       }
 
-      public static string GetString(byte[] data)
+      public static string GetString(DynamicBuffer buffer)
       {
-         return _encoder.GetString(data);
+         return _encoder.GetString(buffer.Buffer, 0, buffer.Length);
       }
    }
 }

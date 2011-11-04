@@ -7,6 +7,7 @@ namespace Metsys.Redis
    {
       private readonly RedisManager _manager;
       private readonly Configuration _configuration;
+      private DynamicBuffer _dynamicBuffer;
       private IConnection _connection;
       private bool _selectedADatabase;
       private bool _error;
@@ -20,37 +21,38 @@ namespace Metsys.Redis
       {
          _manager = manager;
          _configuration = manager.Configuration;
+         _dynamicBuffer = new DynamicBuffer();
       }
 
       private static readonly byte[] _getCommand = Encoding.GetBytes("GET");
       public T Get<T>(string key)
       {
-         var data = Send(Writer.Serialize(_getCommand, key), Reader.Bulk);
-         return data == null ? default(T) : Serializer.Deserialize<T>(data);
+         var length = Send(Writer.Serialize(_getCommand, _dynamicBuffer, key), Reader.Bulk);
+         return length == 0 ? default(T) : Serializer.Deserialize<T>(_dynamicBuffer);
       }
 
       private static readonly byte[] _incrCommand = Encoding.GetBytes("INCR");
       public long Incr(string key)
       {
-         return Send(Writer.Serialize(_incrCommand, key), Reader.Integer);
+         return Send(Writer.Serialize(_incrCommand, _dynamicBuffer, key), Reader.Integer);
       }
 
       private static readonly byte[] _incrByCommand = Encoding.GetBytes("INCRBY");
       public long IncrBy(string key, int value)
       {
-         return Send(Writer.Serialize(_incrByCommand, key, value.ToString()), Reader.Integer);
+         return Send(Writer.Serialize(_incrByCommand, _dynamicBuffer, key, value.ToString()), Reader.Integer);
       }
 
       private static readonly byte[] _delCommand = Encoding.GetBytes("DEL");
       public long Del(params string[] key)
       {
-         return Send(Writer.Serialize(_delCommand, key), Reader.Integer);
+         return Send(Writer.Serialize(_delCommand, _dynamicBuffer, key), Reader.Integer);
       }
 
       private static readonly byte[] _flushDbCommand = Encoding.GetBytes("FLUSHDB");
       public void FlushDb()
       {
-         Send(Writer.Serialize(_flushDbCommand), Reader.Status);
+         Send(Writer.Serialize(_flushDbCommand, _dynamicBuffer), Reader.Status);
       }
 
       
@@ -63,31 +65,31 @@ namespace Metsys.Redis
       private void Select(int database, bool flagAsDifferent)
       {
          if (flagAsDifferent) { _selectedADatabase = true; }
-         Send(Writer.Serialize(_selectCommand, database.ToString()), Reader.Status);
+         Send(Writer.Serialize(_selectCommand, _dynamicBuffer, database.ToString()), Reader.Status);
       }
 
-      private T Send<T>(WriteContext context, Func<Stream, T> callback)
+      private T Send<T>(DynamicBuffer context, Func<Stream, DynamicBuffer, T> callback)
       {
          if (_connection == null)
          {
             _error = false;
             if (_manager.GetConnection(out _connection) && _configuration.Database != 0)
             {
+               var realBuffer = _dynamicBuffer;
+               _dynamicBuffer = new DynamicBuffer();
                Select(_configuration.Database, false);
+               _dynamicBuffer = realBuffer;
             }
          }
-         using (context)
+         try
          {
-            try
-            {
-               Connection.Send(context.Buffer, context.Length);
-               return callback(Connection.GetStream());
-            }
-            catch
-            {
-               _error = true;
-               throw;
-            }
+            Connection.Send(context.Buffer, context.Length);
+            return callback(Connection.GetStream(), _dynamicBuffer);
+         }
+         catch
+         {
+            _error = true;
+            throw;
          }
       }
 
