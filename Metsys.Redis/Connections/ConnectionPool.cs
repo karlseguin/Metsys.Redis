@@ -1,17 +1,16 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace Metsys.Redis
 {
    public class ConnectionPool
    {
-      private const int _poolSize = 5;
       private const int _maximumPoolSize = 10;
-      private readonly object _lock = new object();
+      private readonly AutoResetEvent _notifier = new AutoResetEvent(false);
       private readonly ConnectionInfo _connectionInfo;
-      private readonly Queue<IConnection> _freeConnections = new Queue<IConnection>();
-      private readonly List<IConnection> _invalidConnections = new List<IConnection>();
+      private readonly ConcurrentQueue<IConnection> _freeConnections = new ConcurrentQueue<IConnection>();
+      private readonly ConcurrentQueue<IConnection> _invalidConnections = new ConcurrentQueue<IConnection>();
       private volatile int _connectionsInUse;
       private Timer _timer;
 
@@ -24,41 +23,36 @@ namespace Metsys.Redis
 
       public IConnection CheckOut()
       {
-         lock (_lock)
+         IConnection connection;
+         if (_freeConnections.TryDequeue(out connection))
          {
-            if (_freeConnections.Count > 0)
-            {
-               Interlocked.Increment(ref _connectionsInUse);
-               return _freeConnections.Dequeue();
-            }
-            if (_connectionsInUse >= _maximumPoolSize)
-            {
-               if (!Monitor.Wait(_lock, 10000))
-               {
-                  throw new RedisException("Connection timeout trying to get connection from connection pool");
-               }
-               return CheckOut();
-            }
+            Interlocked.Increment(ref _connectionsInUse);
+            return connection;
          }
 
-         Interlocked.Increment(ref _connectionsInUse);
-         return new Connection(_connectionInfo);
+         if (_connectionsInUse < _maximumPoolSize)
+         {
+            Interlocked.Increment(ref _connectionsInUse);
+            return new Connection(_connectionInfo);
+         }
+         if (!_notifier.WaitOne(10000))
+         {
+            throw new RedisException("Connection timeout trying to get connection from connection pool");
+         }
+         return CheckOut();
       }
 
       public void CheckIn(IConnection connection)
       {
          if (!IsAlive(connection))
          {
-            _invalidConnections.Add(connection);
+            _invalidConnections.Enqueue(connection);
             Interlocked.Decrement(ref _connectionsInUse);
             return;
          }
-         lock (_lock)
-         {
-            _freeConnections.Enqueue(connection);
-            Interlocked.Decrement(ref _connectionsInUse);
-            Monitor.Pulse(_lock);
-         }
+         _freeConnections.Enqueue(connection);
+         Interlocked.Decrement(ref _connectionsInUse);
+         _notifier.Set();
       }
 
       public void Cleanup()
@@ -69,43 +63,32 @@ namespace Metsys.Redis
 
       private void CheckFreeConnectionsAlive()
       {
-         lock (_lock)
+         IConnection connection;
+         if (_freeConnections.TryDequeue(out connection))
          {
-            var freeConnections = _freeConnections.ToArray();
-            _freeConnections.Clear();
-
-            foreach (var connection in freeConnections)
+            if (IsAlive(connection))
             {
-               if (IsAlive(connection) && _freeConnections.Count < _poolSize)
-               {
-                  _freeConnections.Enqueue(connection);
-               }
-               else
-               {
-                  _invalidConnections.Add(connection);
-               }
+               _freeConnections.Enqueue(connection);
             }
-         }
+            else
+            {
+               _invalidConnections.Enqueue(connection);
+            }
+         } 
       }
 
       private void DisposeInvalidConnections()
       {
-         IConnection[] invalidConnections;
-         lock (_lock)
+         IConnection connection;
+         while (_invalidConnections.TryDequeue(out connection))
          {
-            invalidConnections = _invalidConnections.ToArray();
-            _invalidConnections.Clear();
-         }
-
-         foreach (var invalidConnection in invalidConnections)
-         {
-            invalidConnection.Dispose();
+            connection.Dispose();
          }
       }
 
       private static bool IsAlive(IConnection connection)
       {
-         return DateTime.Now.Subtract(connection.Created).TotalMinutes < 10;
+         return DateTime.Now.Subtract(connection.Created).TotalMinutes < 10 && connection.IsAlive();
       }
    }
 }

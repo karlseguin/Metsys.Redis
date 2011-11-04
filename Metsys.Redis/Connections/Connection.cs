@@ -9,6 +9,7 @@ namespace Metsys.Redis
       void Send(byte[] data, int length);
       Stream GetStream();
       DateTime Created { get; }
+      bool IsAlive();
    }
 
    public class Connection : IConnection
@@ -17,6 +18,7 @@ namespace Metsys.Redis
       private readonly DateTime _created;
       private readonly TcpClient _client;
       private readonly NetworkStream _stream;
+      private bool _isValid;
 
       public DateTime Created
       {
@@ -34,22 +36,30 @@ namespace Metsys.Redis
          _client.Connect(connectionInfo.Host, connectionInfo.Port);
          _stream = _client.GetStream();
          _created = DateTime.Now;
+         _isValid = true;
       }
 
       public void Send(byte[] data, int length)
       {
-         _stream.Write(data, 0, length);
+         try
+         {
+            _stream.Write(data, 0, length);
+         }
+         catch (IOException)
+         {
+            _isValid = false;
+            throw;
+         }
       }
-
-      public void BeginSend(byte[] data, int length)
-      {
-         _stream.Write(data, 0, length);
-      }
-
 
       public Stream GetStream()
       {
          return _stream;
+      }
+
+      public bool IsAlive()
+      {
+         return _client.Connected && _isValid;
       }
 
       public void Dispose()
