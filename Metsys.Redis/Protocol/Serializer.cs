@@ -1,27 +1,37 @@
-using System;
-using System.Collections.Generic;
-
 namespace Metsys.Redis
 {
+   public delegate object WriteFunction(DynamicBuffer buffer);
+
    public class Serializer
    {
-      private static readonly IDictionary<Type, Func<DynamicBuffer, object>> _deserializationTypeLookup = new Dictionary<Type, Func<DynamicBuffer, object>>
-        {
-           {typeof (bool), d => d.Buffer[0] == 1},
-           {typeof (int), d => int.Parse(Encoding.GetString(d))},
-           {typeof (long), d => long.Parse(Encoding.GetString(d))},
-
-        };
-
-      public static T Deserialize<T>(DynamicBuffer dynamicBuffer)
+      public static T Deserialize<T>(DynamicBuffer buffer)
       {
-         Func<DynamicBuffer, object> reader;
-         var type = typeof (T);
-         if (_deserializationTypeLookup.TryGetValue(type, out reader))
+         if (Serializer<T>.CacheFunction == null)
          {
-            return (T)reader(dynamicBuffer);
+            return default(T);
          }
-         return default(T);
+         return (T)Serializer<T>.CacheFunction(buffer);
+      }
+   }
+
+   public static class Serializer<T>
+   {
+      public static WriteFunction CacheFunction;
+
+      static Serializer()
+      {
+         if (typeof(T) == typeof(bool))
+         {
+            CacheFunction = d => d.Buffer[0] == 1;
+         }
+         else if (typeof(T) == typeof(int))
+         {
+            CacheFunction = d => int.Parse(Encoding.GetString(d));
+         }
+         else if (typeof(T) == typeof(long))
+         {
+            CacheFunction = d => long.Parse(Encoding.GetString(d));
+         }
       }
    }
 }

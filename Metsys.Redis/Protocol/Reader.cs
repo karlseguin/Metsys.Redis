@@ -37,7 +37,7 @@ namespace Metsys.Redis
          {
             return 0;
          }
-         context.SetLength(length);
+         context.Start(length);
          var buffer = context.Buffer;
          var read = 0;
          while (read < length)
