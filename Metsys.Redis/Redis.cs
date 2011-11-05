@@ -18,7 +18,21 @@ namespace Metsys.Redis
          _dynamicBuffer = new DynamicBuffer();
       }
 
-      
+      public int DbSize()
+      {
+         return (int)Send(Writer.Serialize(Commands.DbSize, _dynamicBuffer), Reader.Integer);
+      }
+
+      public long Del(params string[] key)
+      {
+         return Send(Writer.Serialize(Commands.Del, _dynamicBuffer, key), Reader.Integer);
+      }
+
+      public void FlushDb()
+      {
+         Send(Writer.Serialize(Commands.FlushDb, _dynamicBuffer), Reader.Status);
+      }
+
       public T Get<T>(string key)
       {
          var length = Send(Writer.Serialize(Commands.Get, _dynamicBuffer, key), Reader.Bulk);
@@ -35,14 +49,9 @@ namespace Metsys.Redis
          return Send(Writer.Serialize(Commands.IncrBy, _dynamicBuffer, key, value.ToString()), Reader.Integer);
       }
 
-      public long Del(params string[] key)
+      public string[] Keys(string pattern)
       {
-         return Send(Writer.Serialize(Commands.Del, _dynamicBuffer, key), Reader.Integer);
-      }
-
-      public void FlushDb()
-      {
-         Send(Writer.Serialize(Commands.FlushDb, _dynamicBuffer), Reader.Status);
+         return Send(Writer.Serialize(Commands.Keys, _dynamicBuffer, pattern), Reader.MultiBulk<string>);
       }
 
       public void Select(int database)

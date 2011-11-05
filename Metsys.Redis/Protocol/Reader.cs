@@ -9,6 +9,7 @@ namespace Metsys.Redis
       private const byte _lineMarker = (byte)'+';
       private const byte _errorMarker = (byte)'-';
       private const byte _bulkMarker = (byte)'$';
+      private const byte _multiBulkMarker = (byte)'*';
       private const byte _OReply = (byte)'O';
       private const byte _KReply = (byte)'K';
       private const byte _CRReply = (byte)'\r';
@@ -46,6 +47,19 @@ namespace Metsys.Redis
          }
          ReadCrLf(stream);
          return length;
+      }
+
+      public static T[] MultiBulk<T>(Stream stream, DynamicBuffer buffer)
+      {
+         AssertReplyKind(_multiBulkMarker, stream);
+         var count = ReadNumber(stream);
+         var values = new T[count];
+         for(var i = 0; i < count; ++i)
+         {
+            var length = Bulk(stream, buffer);
+            values[i] = length == 0 ? default(T) : Serializer.Deserialize<T>(buffer);
+         }
+         return values;
       }
 
       private static void AssertNextByteIs(Stream stream, byte expected)

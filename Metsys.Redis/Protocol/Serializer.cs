@@ -32,6 +32,10 @@ namespace Metsys.Redis
          {
             CacheFunction = d => long.Parse(Encoding.GetString(d));
          }
+         else if (typeof(T) == typeof(string))
+         {
+            CacheFunction = d => Encoding.GetString(d);
+         }
       }
    }
 }
