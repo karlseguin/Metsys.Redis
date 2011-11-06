@@ -35,8 +35,7 @@ namespace Metsys.Redis
 
       public T Get<T>(string key)
       {
-         var length = Send(Writer.Serialize(Commands.Get, _dynamicBuffer, key), Reader.Bulk);
-         return length == 0 ? default(T) : Serializer.Deserialize<T>(_dynamicBuffer);
+         return Send(Writer.Serialize(Commands.Get, _dynamicBuffer, key), Reader.Bulk<T>);
       }
 
       public long Incr(string key)

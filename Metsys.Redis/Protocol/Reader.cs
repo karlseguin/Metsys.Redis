@@ -21,7 +21,7 @@ namespace Metsys.Redis
          return ReadNumber(stream);
       }
 
-      public static bool Status(Stream stream, DynamicBuffer context)
+      public static bool Status(Stream stream, DynamicBuffer buffer)
       {
          AssertReplyKind(_lineMarker, stream);
          AssertNextByteIs(stream, _OReply);
@@ -30,23 +30,22 @@ namespace Metsys.Redis
          return true;
       }
 
-      public static int Bulk(Stream stream, DynamicBuffer context)
+      public static T Bulk<T>(Stream stream, DynamicBuffer buffer)
       {
          AssertReplyKind(_bulkMarker, stream);
          var length = (int)ReadNumber(stream);
          if (length == -1)
          {
-            return 0;
+            return default(T);
          }
-         context.Start(length);
-         var buffer = context.Buffer;
+         buffer.Start(length);
          var read = 0;
          while (read < length)
          {
-            read += stream.Read(buffer, read, length);
+            read += stream.Read(buffer.Buffer, read, length);
          }
          ReadCrLf(stream);
-         return length;
+         return Serializer.Deserialize<T>(buffer);
       }
 
       public static T[] MultiBulk<T>(Stream stream, DynamicBuffer buffer)
@@ -56,8 +55,7 @@ namespace Metsys.Redis
          var values = new T[count];
          for(var i = 0; i < count; ++i)
          {
-            var length = Bulk(stream, buffer);
-            values[i] = length == 0 ? default(T) : Serializer.Deserialize<T>(buffer);
+            values[i] = Bulk<T>(stream, buffer);
          }
          return values;
       }
