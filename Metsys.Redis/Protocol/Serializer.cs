@@ -1,3 +1,5 @@
+using System;
+
 namespace Metsys.Redis
 {
    public delegate object WriteFunction(DynamicBuffer buffer);
@@ -20,19 +22,24 @@ namespace Metsys.Redis
 
       static Serializer()
       {
-         if (typeof(T) == typeof(bool))
+         var type = typeof(T);
+         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+         {
+            type = Nullable.GetUnderlyingType(type);
+         }
+         if (type == typeof(bool))
          {
             CacheFunction = d => d.Buffer[0] == 1;
          }
-         else if (typeof(T) == typeof(int))
+         else if (type == typeof(int))
          {
             CacheFunction = d => int.Parse(Encoding.GetString(d));
          }
-         else if (typeof(T) == typeof(long))
+         else if (type == typeof(long))
          {
             CacheFunction = d => long.Parse(Encoding.GetString(d));
          }
-         else if (typeof(T) == typeof(string))
+         else if (type == typeof(string))
          {
             CacheFunction = d => Encoding.GetString(d);
          }

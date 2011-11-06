@@ -20,6 +20,5 @@ namespace Metsys.Redis.Tests.Commands
          BeforeEachTest();
       }
       protected virtual void BeforeEachTest() {}
-
    }
 }
