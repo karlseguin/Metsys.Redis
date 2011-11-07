@@ -41,11 +41,19 @@
   <ItemGroup>
     <Compile Include="Commands\BaseCommandTests.cs" />
     <Compile Include="Commands\DbSizeTests.cs" />
+    <Compile Include="Commands\DelTests.cs" />
+    <Compile Include="Commands\ExistsTests.cs" />
     <Compile Include="Commands\FlushDbTests.cs" />
     <Compile Include="Commands\IncrTests.cs" />
     <Compile Include="Commands\KeysTests.cs" />
+    <Compile Include="Commands\MoveTests.cs" />
+    <Compile Include="Commands\PersistTests.cs" />
+    <Compile Include="Commands\RandomKeyTests.cs" />
+    <Compile Include="Commands\RenameTests.cs" />
     <Compile Include="Commands\SelectTests.cs" />
     <Compile Include="Commands\GetAndSetTests.cs" />
+    <Compile Include="Commands\TtlAndExpireTests.cs" />
+    <Compile Include="Commands\TypeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

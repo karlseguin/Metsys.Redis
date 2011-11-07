@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Text;
 
@@ -15,10 +16,15 @@ namespace Metsys.Redis
       private const byte _CRReply = (byte)'\r';
       private const byte _LFReply = (byte)'\n';
 
-      public static long Integer(Stream stream, DynamicBuffer context)
+      public static long Integer(Stream stream, DynamicBuffer buffer)
       {
          AssertReplyKind(_integerMarker, stream);
          return ReadNumber(stream);
+      }
+
+      public static bool Bool(Stream stream, DynamicBuffer buffer)
+      {
+         return Integer(stream, buffer) == 1;
       }
 
       public static bool Status(Stream stream, DynamicBuffer buffer)
@@ -28,6 +34,12 @@ namespace Metsys.Redis
          AssertNextByteIs(stream, _KReply);
          ReadCrLf(stream);
          return true;
+      }
+
+      public static string String(Stream stream, DynamicBuffer buffer)
+      {
+         AssertReplyKind(_lineMarker, stream);
+         return ReadLine(stream);
       }
 
       public static T Bulk<T>(Stream stream, DynamicBuffer buffer)

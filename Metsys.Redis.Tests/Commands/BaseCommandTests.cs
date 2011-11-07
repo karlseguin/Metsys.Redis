@@ -17,8 +17,13 @@ namespace Metsys.Redis.Tests.Commands
       public void SetUp()
       {
          Redis.FlushDb();
+         Redis.Select(Database + 1);
+         Redis.FlushDb();
+         Redis.Select(Database);
          BeforeEachTest();
       }
-      protected virtual void BeforeEachTest() {}
+      protected virtual void BeforeEachTest()
+      {
+      }
    }
 }

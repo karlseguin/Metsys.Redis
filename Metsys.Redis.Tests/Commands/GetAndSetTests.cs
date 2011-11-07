@@ -17,7 +17,7 @@ namespace Metsys.Redis.Tests.Commands
          AssertEqual(true);
          AssertEqual(false);
          AssertEqual("hello world");
-         AssertEqual("伦");
+         AssertEqual("a伦b");
          AssertDateEqual(DateTime.Now);
          AssertDateEqual(DateTime.MinValue);
          AssertDateEqual(new DateTime(9999, 12, 31));
