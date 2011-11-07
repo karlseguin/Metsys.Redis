@@ -13,6 +13,8 @@ namespace Metsys.Redis
       public static readonly byte[] FlushDb = Helper.GetBytes("FLUSHDB");
       public static readonly byte[] Get = Helper.GetBytes("GET");
       public static readonly byte[] GetBit = Helper.GetBytes("GETBIT");
+      public static readonly byte[] GetRange = Helper.GetBytes("GETRANGE");
+      public static readonly byte[] GetSet = Helper.GetBytes("GetSet");
       public static readonly byte[] Incr = Helper.GetBytes("INCR");
       public static readonly byte[] IncrBy = Helper.GetBytes("INCRBY");
       public static readonly byte[] Keys = Helper.GetBytes("KEYS");

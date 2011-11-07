@@ -73,6 +73,16 @@ namespace Metsys.Redis
          return Send(Writer.Serialize(Commands.GetBit, _dynamicBuffer, key, offset), Reader.Bool);
       }
 
+      public string GetRange(string key, int start, int end)
+      {
+         return Send(Writer.Serialize(Commands.GetRange, _dynamicBuffer, key, start, end), Reader.Bulk<string>);
+      }
+
+      public T GetSet<T>(string key, object value)
+      {
+         return Send(Writer.Serialize(Commands.GetSet, _dynamicBuffer, key, value), Reader.Bulk<T>);
+      }
+
       public long Incr(string key)
       {
          return Send(Writer.Serialize(Commands.Incr, _dynamicBuffer, key), Reader.Integer);

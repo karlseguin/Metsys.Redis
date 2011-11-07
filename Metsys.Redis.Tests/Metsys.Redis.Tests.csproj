@@ -47,6 +47,7 @@
     <Compile Include="Commands\ExistsTests.cs" />
     <Compile Include="Commands\FlushDbTests.cs" />
     <Compile Include="Commands\GetAndSetBitTests.cs" />
+    <Compile Include="Commands\GetRangeTests.cs" />
     <Compile Include="Commands\IncrTests.cs" />
     <Compile Include="Commands\KeysTests.cs" />
     <Compile Include="Commands\MoveTests.cs" />

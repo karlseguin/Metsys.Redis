@@ -15,6 +15,8 @@ namespace Metsys.Redis
       void FlushDb();
       T Get<T>(string key);
       bool GetBit(string key, int offset);
+      string GetRange(string key, int start, int end);
+      T GetSet<T>(string key, object value);
       long Incr(string key);
       long IncrBy(string key, int value);
       string[] Keys(string pattern = "*");

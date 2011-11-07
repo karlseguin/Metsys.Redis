@@ -23,6 +23,14 @@ namespace Metsys.Redis.Tests.Commands
          AssertDateEqual(new DateTime(9999, 12, 31));
       }
 
+      [Test]
+      public void GetSetTest()
+      {
+         Redis.Set("key1", "old");
+         Assert.AreEqual("old", Redis.GetSet<string>("key1", 44));
+         Assert.AreEqual(44, Redis.Get<int>("key1"));
+      }
+
       private void AssertEqual<T>(T i)
       {
          Redis.Set("get:set:test:1", i);
