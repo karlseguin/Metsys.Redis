@@ -14,6 +14,7 @@ namespace Metsys.Redis
       bool ExpireAt(string key, DateTime date);
       void FlushDb();
       T Get<T>(string key);
+      bool GetBit(string key, int offset);
       long Incr(string key);
       long IncrBy(string key, int value);
       string[] Keys(string pattern = "*");
@@ -24,6 +25,7 @@ namespace Metsys.Redis
       bool RenameNx(string key, string newName);
       void Select(int database);
       void Set(string key, object value);
+      bool SetBit(string key, int offset, bool bit);
       long Ttl(string key);
       string Type(string key);
    }

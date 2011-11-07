@@ -68,6 +68,11 @@ namespace Metsys.Redis
          return Send(Writer.Serialize(Commands.Get, _dynamicBuffer, key), Reader.Bulk<T>);
       }
 
+      public bool GetBit(string key, int offset)
+      {
+         return Send(Writer.Serialize(Commands.GetBit, _dynamicBuffer, key, offset), Reader.Bool);
+      }
+
       public long Incr(string key)
       {
          return Send(Writer.Serialize(Commands.Incr, _dynamicBuffer, key), Reader.Integer);
@@ -116,6 +121,11 @@ namespace Metsys.Redis
       public void Set(string key, object value)
       {
          Send(Writer.Serialize(Commands.Set, _dynamicBuffer, key, value), Reader.Status);
+      }
+
+      public bool SetBit(string key, int offset, bool bit)
+      {
+         return Send(Writer.Serialize(Commands.SetBit, _dynamicBuffer, key, offset, bit ? 1 : 0), Reader.Bool);
       }
 
       public long Ttl(string key)
