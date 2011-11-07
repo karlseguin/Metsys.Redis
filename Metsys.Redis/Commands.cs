@@ -18,7 +18,10 @@ namespace Metsys.Redis
       public static readonly byte[] Incr = Helper.GetBytes("INCR");
       public static readonly byte[] IncrBy = Helper.GetBytes("INCRBY");
       public static readonly byte[] Keys = Helper.GetBytes("KEYS");
+      public static readonly byte[] MGet = Helper.GetBytes("MGET");
       public static readonly byte[] Move = Helper.GetBytes("MOVE");
+      public static readonly byte[] MSet = Helper.GetBytes("MSET");
+      public static readonly byte[] MSetNx = Helper.GetBytes("MSETNX");
       public static readonly byte[] Persist = Helper.GetBytes("PERSIST");
       public static readonly byte[] RandomKey = Helper.GetBytes("RANDOMKEY");
       public static readonly byte[] Rename = Helper.GetBytes("RENAME");
@@ -26,6 +29,10 @@ namespace Metsys.Redis
       public static readonly byte[] Select = Helper.GetBytes("SELECT");
       public static readonly byte[] Set = Helper.GetBytes("SET");
       public static readonly byte[] SetBit = Helper.GetBytes("SETBIT");
+      public static readonly byte[] SetEx = Helper.GetBytes("SETEX");
+      public static readonly byte[] SetNx = Helper.GetBytes("SETNX");
+      public static readonly byte[] SetRange = Helper.GetBytes("SETRANGE");
+      public static readonly byte[] StrLen = Helper.GetBytes("STRLEN");
       public static readonly byte[] Ttl = Helper.GetBytes("TTL");
       public static readonly byte[] Type = Helper.GetBytes("TYPE");
    }

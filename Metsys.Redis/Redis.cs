@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Metsys.Redis
@@ -98,10 +99,38 @@ namespace Metsys.Redis
          return Send(Writer.Serialize(Commands.Keys, _dynamicBuffer, pattern), Reader.MultiBulk<string>);
       }
 
+      public T[] MGet<T>(params string[] keys)
+      {
+         return Send(Writer.Serialize(Commands.MGet, _dynamicBuffer, keys), Reader.MultiBulk<T>);
+      }
+
       public bool Move(string key, int database)
       {
          return Send(Writer.Serialize(Commands.Move, _dynamicBuffer, key, database), Reader.Bool);
       }
+
+      public void MSet(ICollection<KeyValuePair<string, object>> keyAndValues)
+      {
+         Send(Writer.Serialize(Commands.MSet, _dynamicBuffer, DictionaryToValueArray(keyAndValues)), Reader.Status);
+      }
+
+      public bool MSetNx(ICollection<KeyValuePair<string, object>> keyAndValues)
+      {
+         return Send(Writer.Serialize(Commands.MSetNx, _dynamicBuffer, DictionaryToValueArray(keyAndValues)), Reader.Bool);
+      }
+
+      private static object[] DictionaryToValueArray(ICollection<KeyValuePair<string, object>> keyAndValues)
+      {
+         var values = new object[keyAndValues.Count * 2];
+         var i = 0;
+         foreach (var kvp in keyAndValues)
+         {
+            values[i++] = kvp.Key;
+            values[i++] = kvp.Value;
+         }
+         return values;
+      }
+
 
       public bool Persist(string key)
       {
@@ -136,6 +165,26 @@ namespace Metsys.Redis
       public bool SetBit(string key, int offset, bool bit)
       {
          return Send(Writer.Serialize(Commands.SetBit, _dynamicBuffer, key, offset, bit ? 1 : 0), Reader.Bool);
+      }
+
+      public void SetEx(string key, int seconds, object value)
+      {
+         Send(Writer.Serialize(Commands.SetEx, _dynamicBuffer, key, seconds, value), Reader.Status);
+      }
+
+      public bool SetNx(string key, object value)
+      {
+         return Send(Writer.Serialize(Commands.SetNx, _dynamicBuffer, key, value), Reader.Bool);
+      }
+
+      public int SetRange(string key, int offset, object value)
+      {
+         return (int) Send(Writer.Serialize(Commands.SetRange, _dynamicBuffer, key, offset, value), Reader.Integer);
+      }
+
+      public int StrLen(string key)
+      {
+         return (int) Send(Writer.Serialize(Commands.StrLen, _dynamicBuffer, key), Reader.Integer);
       }
 
       public long Ttl(string key)

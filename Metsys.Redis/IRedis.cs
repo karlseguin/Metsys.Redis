@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Metsys.Redis
 {
@@ -20,7 +21,10 @@ namespace Metsys.Redis
       long Incr(string key);
       long IncrBy(string key, int value);
       string[] Keys(string pattern = "*");
+      T[] MGet<T>(params string[] keys);
       bool Move(string key, int database);
+      void MSet(ICollection<KeyValuePair<string, object>> keyAndValues);
+      bool MSetNx(ICollection<KeyValuePair<string, object>> keyAndValues);
       bool Persist(string key);
       string RandomKey();
       void Rename(string key, string newName);
@@ -28,6 +32,10 @@ namespace Metsys.Redis
       void Select(int database);
       void Set(string key, object value);
       bool SetBit(string key, int offset, bool bit);
+      void SetEx(string key, int seconds, object value);
+      bool SetNx(string key, object value);
+      int SetRange(string key, int offset, object value);
+      int StrLen(string key);
       long Ttl(string key);
       string Type(string key);
    }

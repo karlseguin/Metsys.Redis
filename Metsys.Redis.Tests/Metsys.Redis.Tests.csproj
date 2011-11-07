@@ -50,12 +50,16 @@
     <Compile Include="Commands\GetRangeTests.cs" />
     <Compile Include="Commands\IncrTests.cs" />
     <Compile Include="Commands\KeysTests.cs" />
+    <Compile Include="Commands\MGetTests.cs" />
     <Compile Include="Commands\MoveTests.cs" />
+    <Compile Include="Commands\MSetTests.cs" />
     <Compile Include="Commands\PersistTests.cs" />
     <Compile Include="Commands\RandomKeyTests.cs" />
     <Compile Include="Commands\RenameTests.cs" />
     <Compile Include="Commands\SelectTests.cs" />
     <Compile Include="Commands\GetAndSetTests.cs" />
+    <Compile Include="Commands\SetRangeTests.cs" />
+    <Compile Include="Commands\StrLenTests.cs" />
     <Compile Include="Commands\TtlAndExpireTests.cs" />
     <Compile Include="Commands\TypeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

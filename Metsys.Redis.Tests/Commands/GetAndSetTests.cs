@@ -31,6 +31,22 @@ namespace Metsys.Redis.Tests.Commands
          Assert.AreEqual(44, Redis.Get<int>("key1"));
       }
 
+      [Test]
+      public void SetNxDoesntSetTheValueIfTheKeyAlreadyExists()
+      {
+         Assert.AreEqual(true, Redis.SetNx("key1", "old"));
+         Assert.AreEqual(false, Redis.SetNx("key1", "new"));
+         Assert.AreEqual("old", Redis.Get<string>("key1"));
+      }
+
+      [Test]
+      public void SetExSetsAKeyWithAnExpiry()
+      {
+         Redis.SetEx("key1", 5000, "value");
+         Assert.AreEqual(5000, Redis.Ttl("key1"));
+         Assert.AreEqual("value", Redis.Get<string>("key1"));
+      }
+
       private void AssertEqual<T>(T i)
       {
          Redis.Set("get:set:test:1", i);
