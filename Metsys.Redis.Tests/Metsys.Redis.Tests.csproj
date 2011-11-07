@@ -42,6 +42,7 @@
     <Compile Include="Commands\AppendTests.cs" />
     <Compile Include="Commands\BaseCommandTests.cs" />
     <Compile Include="Commands\DbSizeTests.cs" />
+    <Compile Include="Commands\DecrTests.cs" />
     <Compile Include="Commands\DelTests.cs" />
     <Compile Include="Commands\ExistsTests.cs" />
     <Compile Include="Commands\FlushDbTests.cs" />

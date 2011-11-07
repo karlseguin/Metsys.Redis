@@ -4,6 +4,8 @@ namespace Metsys.Redis
    {
       public static readonly byte[] Append = Helper.GetBytes("APPEND");
       public static readonly byte[] DbSize = Helper.GetBytes("DBSIZE");
+      public static readonly byte[] Decr = Helper.GetBytes("DECR");
+      public static readonly byte[] DecrBy = Helper.GetBytes("DECRBY");
       public static readonly byte[] Del = Helper.GetBytes("DEL");
       public static readonly byte[] Exists = Helper.GetBytes("EXISTS");
       public static readonly byte[] Expire = Helper.GetBytes("EXPIRE");

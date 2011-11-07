@@ -28,6 +28,16 @@ namespace Metsys.Redis
          return (int)Send(Writer.Serialize(Commands.DbSize, _dynamicBuffer), Reader.Integer);
       }
 
+      public long Decr(string key)
+      {
+         return Send(Writer.Serialize(Commands.Decr, _dynamicBuffer, key), Reader.Integer);
+      }
+
+      public long DecrBy(string key, int value)
+      {
+         return Send(Writer.Serialize(Commands.DecrBy, _dynamicBuffer, key, value), Reader.Integer);
+      }
+
       public long Del(params string[] key)
       {
          return Send(Writer.Serialize(Commands.Del, _dynamicBuffer, key), Reader.Integer);

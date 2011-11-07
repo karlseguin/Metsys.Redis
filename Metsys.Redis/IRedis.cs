@@ -6,6 +6,8 @@ namespace Metsys.Redis
    {
       int Append(string key, string value);
       int DbSize();
+      long Decr(string key);
+      long DecrBy(string key, int value);
       long Del(params string[] key);
       bool Exists(string key);
       bool Expire(string key, int seconds);
