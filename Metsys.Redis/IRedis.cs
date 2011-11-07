@@ -4,6 +4,7 @@ namespace Metsys.Redis
 {
    public interface IRedis : IDisposable
    {
+      int Append(string key, string value);
       int DbSize();
       long Del(params string[] key);
       bool Exists(string key);

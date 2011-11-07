@@ -18,6 +18,11 @@ namespace Metsys.Redis
          _dynamicBuffer = new DynamicBuffer();
       }
 
+      public int Append(string key, string value)
+      {
+         return (int)Send(Writer.Serialize(Commands.Append, _dynamicBuffer, key, value), Reader.Integer);
+      }
+
       public int DbSize()
       {
          return (int)Send(Writer.Serialize(Commands.DbSize, _dynamicBuffer), Reader.Integer);

@@ -2,6 +2,7 @@ namespace Metsys.Redis
 {
    public class Commands
    {
+      public static readonly byte[] Append = Helper.GetBytes("APPEND");
       public static readonly byte[] DbSize = Helper.GetBytes("DBSIZE");
       public static readonly byte[] Del = Helper.GetBytes("DEL");
       public static readonly byte[] Exists = Helper.GetBytes("EXISTS");

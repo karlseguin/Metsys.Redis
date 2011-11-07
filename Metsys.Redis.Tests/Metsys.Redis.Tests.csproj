@@ -39,6 +39,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\AppendTests.cs" />
     <Compile Include="Commands\BaseCommandTests.cs" />
     <Compile Include="Commands\DbSizeTests.cs" />
     <Compile Include="Commands\DelTests.cs" />
