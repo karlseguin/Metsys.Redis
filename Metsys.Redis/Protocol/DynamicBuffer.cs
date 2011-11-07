@@ -1,3 +1,5 @@
+using System;
+
 namespace Metsys.Redis
 {
    public class DynamicBuffer
@@ -72,6 +74,13 @@ namespace Metsys.Redis
          System.Buffer.BlockCopy(_currentBuffer, 0, newBuffer, 0, _size);
          _currentBuffer = newBuffer;
          _size = newSize;
+      }
+
+      public byte[] ToArray()
+      {
+         var data = new byte[Length];
+         System.Buffer.BlockCopy(_currentBuffer, 0, data, 0, Length);
+         return data;
       }
    }
 }

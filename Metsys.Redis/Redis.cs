@@ -58,10 +58,15 @@ namespace Metsys.Redis
          Select(database, true);
       }
 
+      public void Set(string key, object value)
+      {
+         Send(Writer.Serialize(Commands.Set, _dynamicBuffer, key, value), Reader.Status);
+      }
+
       private void Select(int database, bool flagAsDifferent)
       {
          if (flagAsDifferent) { _selectedADatabase = true; }
-         Send(Writer.Serialize(Commands.Select, _dynamicBuffer, database.ToString()), Reader.Status);
+         Send(Writer.Serialize(Commands.Select, _dynamicBuffer, database), Reader.Status);
       }
 
       private T Send<T>(DynamicBuffer context, Func<Stream, DynamicBuffer, T> callback)

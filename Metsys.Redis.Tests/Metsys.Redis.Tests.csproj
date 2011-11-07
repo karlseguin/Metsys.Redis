@@ -45,6 +45,7 @@
     <Compile Include="Commands\IncrTests.cs" />
     <Compile Include="Commands\KeysTests.cs" />
     <Compile Include="Commands\SelectTests.cs" />
+    <Compile Include="Commands\GetAndSetTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

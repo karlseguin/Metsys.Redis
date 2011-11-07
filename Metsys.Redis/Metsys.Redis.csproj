@@ -43,7 +43,7 @@
     <Compile Include="Connections\ConnectionInfo.cs" />
     <Compile Include="IRedis.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Protocol\Encoding.cs" />
+    <Compile Include="Protocol\Helper.cs" />
     <Compile Include="Protocol\Reader.cs" />
     <Compile Include="Protocol\Serializer.cs" />
     <Compile Include="Protocol\DynamicBuffer.cs" />

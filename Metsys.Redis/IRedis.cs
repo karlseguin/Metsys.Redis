@@ -12,5 +12,6 @@ namespace Metsys.Redis
       long IncrBy(string key, int value);
       string[] Keys(string pattern = "*");
       void Select(int database);
+      void Set(string key, object value);
    }
 }
